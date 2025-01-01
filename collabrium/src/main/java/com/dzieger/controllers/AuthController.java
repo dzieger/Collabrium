@@ -1,5 +1,7 @@
 package com.dzieger.controllers;
 
+import com.dzieger.models.DTOs.LoginDTO;
+import com.dzieger.models.DTOs.TokenDTO;
 import com.dzieger.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,15 +31,16 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
+    public ResponseEntity<TokenDTO> login(@RequestBody LoginDTO credentials) {
         logger.info("Received login request");
         try {
-            String username = credentials.get("username");
-            String password = credentials.get("password");
+            String username = credentials.getUsername();
+            String password = credentials.getPassword();
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            String token = jwtUtil.generateToken(username);
+            TokenDTO tokenDTO = new TokenDTO();
+            tokenDTO.setToken(jwtUtil.generateToken(username));
             logger.info("Login successful");
-            return ResponseEntity.ok(Map.of("token", token));
+            return ResponseEntity.ok(tokenDTO);
         } catch (AuthenticationException e) {
             logger.error("Login failed", e);
             return ResponseEntity.status(401).build();
