@@ -1,5 +1,7 @@
 package com.dzieger.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,7 @@ public class AppUser {
     private String lastName;
 
     @OneToMany(mappedBy = "appUser", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<UserRole> roles;
 
     public AppUser() {
@@ -99,5 +102,16 @@ public class AppUser {
 
     public void setRoles(List<UserRole> roles) {
         this.roles = roles;
+    }
+
+    @Override
+    public String toString() {
+        return "AppUser{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\''+
+                '}';
     }
 }
