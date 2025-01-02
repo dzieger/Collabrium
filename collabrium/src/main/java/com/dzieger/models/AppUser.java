@@ -37,7 +37,8 @@ public class AppUser {
     private List<UserRole> roles;
 
     @Column(nullable = false)
-    private int tokenVersion = 0;
+    @Version
+    private int tokenVersion;
 
     public AppUser() {
     }

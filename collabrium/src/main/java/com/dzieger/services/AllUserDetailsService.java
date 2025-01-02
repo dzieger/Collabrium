@@ -79,13 +79,17 @@ public class AllUserDetailsService implements UserDetailsService {
         AppUser appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return new User(
+        return new CustomUserDetails(
                 appUser.getUsername(),
                 appUser.getPassword(),
                 appUser.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getRole().getName()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                appUser.getTokenVersion()
         );
     }
 
+    public boolean getIsDevProfile() {
+        return isDevProfile;
+    }
 }

@@ -68,11 +68,12 @@ public class AuthService {
 
             CustomUserDetails userDetails = (CustomUserDetails) allUserDetailsService.loadUserByUsername(username);
 
-            if (tokenVersion != userDetails.getTokenVersion()) {
-                throw new InvalidTokenException("Refresh Token Failed - Invalid token version");
+            jwtUtil.validateToken(incomingTokenDTO.getToken(), userDetails.getTokenVersion());
+
+            if(!allUserDetailsService.getIsDevProfile()) {
+                incrementTokenVersion(userDetails);
             }
 
-            jwtUtil.validateToken(incomingTokenDTO.getToken(), userDetails.getTokenVersion());
 
             String newToken = jwtUtil.generateToken(username, tokenVersion);
 
@@ -84,6 +85,32 @@ public class AuthService {
         } catch (Exception e) {
             logger.error("Token refresh failed", e);
             throw new InvalidTokenException("Token refresh failed", e);
+        }
+    }
+
+    public String logout(TokenDTO incomingTokenDTO) {
+        logger.info("Received logout request");
+
+        try {
+            String username = jwtUtil.extractUsername(incomingTokenDTO.getToken());
+            if (username == null) {
+                throw new InvalidTokenException("Logout Failed - Invalid token");
+            }
+            int tokenVersion = jwtUtil.extractTokenVersion(incomingTokenDTO.getToken());
+
+            CustomUserDetails userDetails = (CustomUserDetails) allUserDetailsService.loadUserByUsername(username);
+
+            jwtUtil.validateToken(incomingTokenDTO.getToken(), userDetails.getTokenVersion());
+
+            logger.info("Token version before logout: " + userDetails.getTokenVersion());
+            userDetails.setTokenVersion(userDetails.getTokenVersion() + 1);
+            logger.info("Token version after logout: " + userDetails.getTokenVersion());
+
+            logger.info("Token invalidated for user: " + jwtUtil.extractUsername(incomingTokenDTO.getToken()));
+            return "Logout successful";
+        } catch (Exception e) {
+            logger.error("Logout failed", e);
+            throw new InvalidTokenException("Logout failed", e);
         }
     }
 
@@ -100,6 +127,13 @@ public class AuthService {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    public void incrementTokenVersion(CustomUserDetails userDetails) {
+        AppUser appUser = getUserByUsername(userDetails.getUsername());
 
+        appUser.setTokenVersion(appUser.getTokenVersion() + 1);
+        userRepository.save(appUser);
+
+        logger.info("Token version incremented for user: " + userDetails.getUsername());
+    }
 
 }

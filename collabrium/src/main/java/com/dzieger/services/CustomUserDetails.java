@@ -10,7 +10,7 @@ public class CustomUserDetails implements UserDetails {
     private final String username;
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
-    private final int tokenVersion;
+    private int tokenVersion;
 
     public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, int tokenVersion) {
         this.username = username;
@@ -36,5 +36,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return username;
+    }
+
+    public void setTokenVersion(int tokenVersion) {
+        this.tokenVersion = tokenVersion;
     }
 }
