@@ -26,70 +26,18 @@ public class AllUserDetailsService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    private final boolean isDevProfile;
-
     public AllUserDetailsService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
-        this.isDevProfile = "dev".equals(System.getProperty("spring.profiles.active", "dev"));
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (isDevProfile) {
-            logger.info("Using DevUserDetailsService to load user: {}", username);
-            return loadDevUser(username);
-        } else {
-            logger.info("Using ProdUserDetailsService to load user: {}", username);
-            return loadProdUser(username);
-        }
-    }
-
-    private UserDetails loadDevUser(String username) {
-        logger.info("Using DevUserDetailsService to load user: {}", username);
-
-        if ("admin".equals(username)) {
-            CustomUserDetails userDetails = new CustomUserDetails(
-                    "admin",
-                    passwordEncoder.encode("password"),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")),
-                    0
-            );
-            logger.info("Loaded user: {}", username);
-            return userDetails;
-        } else if ("user".equals(username)) {
-            CustomUserDetails userDetails = new CustomUserDetails(
-                    "user",
-                    passwordEncoder.encode("password"),
-                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
-                    0
-            );
-            logger.info("Loaded user: {}", username);
-            return userDetails;
-        }
-
-
-
-        throw new UsernameNotFoundException("User not found: " + username);
-    }
-
-    private UserDetails loadProdUser(String username) {
-        logger.info("Using ProdUserDetailsService to load user: {}", username);
+        logger.info("Loading user: {}", username);
 
         AppUser appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return new CustomUserDetails(
-                appUser.getUsername(),
-                appUser.getPassword(),
-                appUser.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority(role.getRole().getName()))
-                        .collect(Collectors.toList()),
-                appUser.getTokenVersion()
-        );
-    }
-
-    public boolean getIsDevProfile() {
-        return isDevProfile;
+        return new CustomUserDetails(appUser);
     }
 }
