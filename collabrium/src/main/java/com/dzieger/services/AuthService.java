@@ -49,19 +49,19 @@ public class AuthService {
         logger.info("Received login request");
 
         try {
-            var authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword())
             );
 
             CustomUserDetails userDetails = (CustomUserDetails) allUserDetailsService.loadUserByUsername(loginDTO.getUsername());
-            logger.info("Auth Service: User details loaded for user: " + userDetails.getUsername());
+            logger.info("Auth Service: User details loaded for user: {}", userDetails.getUsername());
 
             String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getTokenVersion(), userDetails.getAuthorities());
 
             TokenDTO tokenDTO = new TokenDTO();
             tokenDTO.setToken(token);
 
-            logger.info("Login Success - Token generated for user: " + jwtUtil.extractUsername(token));
+            logger.info("Login Success - Token generated for user: {}", jwtUtil.extractUsername(token));
             return tokenDTO;
         } catch (AuthenticationException e) {
             logger.error("Login Failed - Invalid username or password");
@@ -90,10 +90,9 @@ public class AuthService {
             TokenDTO tokenDTO = new TokenDTO();
             tokenDTO.setToken(newToken);
 
-            logger.info("Token refreshed for user: " + jwtUtil.extractUsername(newToken));
+            logger.info("Token refreshed for user: {}", jwtUtil.extractUsername(newToken));
             return tokenDTO;
         } catch (Exception e) {
-            logger.error("Token refresh failed", e);
             throw new InvalidTokenException("Token refresh failed", e);
         }
     }
@@ -106,7 +105,6 @@ public class AuthService {
             if (username == null) {
                 throw new InvalidTokenException("Logout Failed - Invalid token");
             }
-            int tokenVersion = jwtUtil.extractTokenVersion(incomingTokenDTO.getToken());
 
             CustomUserDetails userDetails = (CustomUserDetails) allUserDetailsService.loadUserByUsername(username);
 
@@ -114,10 +112,9 @@ public class AuthService {
 
             incrementTokenVersion(userDetails);
 
-            logger.info("Token invalidated for user: " + jwtUtil.extractUsername(incomingTokenDTO.getToken()));
+            logger.info("Token invalidated for user: {}", username);
             return "Logout successful";
         } catch (Exception e) {
-            logger.error("Logout failed", e);
             throw new InvalidTokenException("Logout failed", e);
         }
     }
@@ -151,7 +148,7 @@ public class AuthService {
         userRoleMapping.setRole(userRole);
         userRoleRepository.save(userRoleMapping);
 
-        logger.info("Register Success - User registered: " + appUser.getUsername());
+        logger.info("Register Success - User registered: {}", appUser.getUsername());
         return "Register Success - User registered: " + appUser.getUsername();
     }
 
@@ -174,7 +171,7 @@ public class AuthService {
         appUser.setTokenVersion(appUser.getTokenVersion() + 1);
         userRepository.save(appUser);
 
-        logger.info("Token version incremented for user: " + userDetails.getUsername());
+        logger.info("Token version incremented for user: {}", userDetails.getUsername());
     }
 
 }
