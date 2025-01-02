@@ -1,8 +1,13 @@
 package com.dzieger.controllers;
 
+import com.dzieger.exceptions.InvalidTokenException;
+import com.dzieger.models.AppUser;
 import com.dzieger.models.DTOs.LoginDTO;
+import com.dzieger.models.DTOs.RequestRefreshTokenDTO;
 import com.dzieger.models.DTOs.TokenDTO;
 import com.dzieger.security.JwtUtil;
+import com.dzieger.services.AuthService;
+import com.dzieger.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,30 +26,21 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final Logger logger = LoggerFactory.getLogger(AuthController.class);
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+    @Autowired
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@RequestBody LoginDTO credentials) {
-        logger.info("Received login request");
-        try {
-            String username = credentials.getUsername();
-            String password = credentials.getPassword();
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            TokenDTO tokenDTO = new TokenDTO();
-            tokenDTO.setToken(jwtUtil.generateToken(username));
-            logger.info("Login successful");
-            return ResponseEntity.ok(tokenDTO);
-        } catch (AuthenticationException e) {
-            logger.error("Login failed", e);
-            return ResponseEntity.status(401).build();
-        }
+        return ResponseEntity.ok(authService.login(credentials));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenDTO> refresh(@RequestBody TokenDTO incomingTokenDTO) {
+        return ResponseEntity.ok(authService.refresh(incomingTokenDTO));
     }
 
 }
