@@ -36,16 +36,21 @@ public class AppUser {
     @JsonIgnore
     private List<UserRole> roles;
 
+    @Column(nullable = false)
+    @Version
+    private int tokenVersion;
+
     public AppUser() {
     }
 
-    public AppUser(UUID id, String username, String password, String email, String firstName, String lastName) {
+    public AppUser(UUID id, String username, String password, String email, String firstName, String lastName, int tokenVersion) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.tokenVersion = tokenVersion;
     }
 
     public UUID getId() {
@@ -102,6 +107,14 @@ public class AppUser {
 
     public void setRoles(List<UserRole> roles) {
         this.roles = roles;
+    }
+
+    public int getTokenVersion() {
+        return tokenVersion;
+    }
+
+    public void setTokenVersion(int tokenVersion) {
+        this.tokenVersion = tokenVersion;
     }
 
     @Override

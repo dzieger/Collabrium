@@ -5,6 +5,7 @@ import com.dzieger.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
@@ -35,8 +37,10 @@ public class AllUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         if (isDevProfile) {
+            logger.info("Using DevUserDetailsService to load user: {}", username);
             return loadDevUser(username);
         } else {
+            logger.info("Using ProdUserDetailsService to load user: {}", username);
             return loadProdUser(username);
         }
     }
@@ -45,18 +49,26 @@ public class AllUserDetailsService implements UserDetailsService {
         logger.info("Using DevUserDetailsService to load user: {}", username);
 
         if ("admin".equals(username)) {
-            return User.builder()
-                    .username("admin")
-                    .password(passwordEncoder.encode("password"))
-                    .roles("ADMIN")
-                    .build();
+            CustomUserDetails userDetails = new CustomUserDetails(
+                    "admin",
+                    passwordEncoder.encode("password"),
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")),
+                    0
+            );
+            logger.info("Loaded user: {}", username);
+            return userDetails;
         } else if ("user".equals(username)) {
-            return User.builder()
-                    .username("user")
-                    .password(passwordEncoder.encode("password"))
-                    .roles("USER")
-                    .build();
+            CustomUserDetails userDetails = new CustomUserDetails(
+                    "user",
+                    passwordEncoder.encode("password"),
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")),
+                    0
+            );
+            logger.info("Loaded user: {}", username);
+            return userDetails;
         }
+
+
 
         throw new UsernameNotFoundException("User not found: " + username);
     }
@@ -67,13 +79,17 @@ public class AllUserDetailsService implements UserDetailsService {
         AppUser appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        return new User(
+        return new CustomUserDetails(
                 appUser.getUsername(),
                 appUser.getPassword(),
                 appUser.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getRole().getName()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                appUser.getTokenVersion()
         );
     }
 
+    public boolean getIsDevProfile() {
+        return isDevProfile;
+    }
 }

@@ -1,5 +1,9 @@
 package com.dzieger.security;
 
+import com.dzieger.exceptions.InvalidTokenException;
+import com.dzieger.exceptions.TokenExpiredException;
+import com.dzieger.models.AppUser;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +25,22 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         logger.info("Extracting username from token");
-        return extractClaim(token, Claims::getSubject);
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.getSubject();
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Unable to extract username: Invalid Token", e);
+        }
+    }
+
+    public int extractTokenVersion(String token) {
+        logger.info("Extracting token version from token");
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.get("tokenVersion", Integer.class);
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Unable to extract token version: Invalid Token", e);
+        }
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -35,20 +54,40 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, int tokenVersion) {
         logger.info("Generating token for user: " + username);
         return Jwts.builder()
                 .setSubject(username)
+                .claim("tokenVersion", tokenVersion)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(secretKey)
                 .compact();
     }
 
-    public boolean validateToken(String token, String username) {
-        String extractedUsername = extractUsername(token);
-        logger.info("Validating token for user: " + extractedUsername);
-        return extractedUsername.equals(username) && !isTokenExpired(token);
+    private boolean validateToken(String token) {
+        try {
+            return !isTokenExpired(token);
+        } catch (TokenExpiredException e) {
+            throw new TokenExpiredException("Token has expired");
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Token is invalid", e);
+        }
+    }
+
+    public boolean validateToken(String token, int tokenVersion) {
+        logger.info("Validating token");
+        Claims claims = extractAllClaims(token);
+        int tokenVersionClaim = claims.get("tokenVersion", Integer.class);
+
+        if (isTokenExpired(token)) {
+            throw new TokenExpiredException("Token has expired");
+        }
+
+        if (tokenVersionClaim != tokenVersion) {
+            throw new InvalidTokenException("Token version mismatch");
+        }
+        return true;
     }
 
     private boolean isTokenExpired(String token) {
