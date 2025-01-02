@@ -3,7 +3,7 @@ package com.dzieger.models;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
+import java.util.*;
 
 @Component
 @Entity
@@ -17,11 +17,14 @@ public class Role {
     @Column(nullable = false)
     private String name;
 
+    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
+    private List<UserRole> userRoles = new ArrayList<>();
+
+
     public Role() {
     }
 
-    public Role(UUID id, String name) {
-        this.id = id;
+    public Role(String name) {
         this.name = name;
     }
 
@@ -39,5 +42,13 @@ public class Role {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<UserRole> getUserRoles() {
+        return userRoles;
+    }
+
+    public void setUserRoles(List<UserRole> userRoles) {
+        this.userRoles = userRoles;
     }
 }

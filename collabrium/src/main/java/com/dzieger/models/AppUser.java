@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,9 +33,8 @@ public class AppUser {
     @Column(nullable = false)
     private String lastName;
 
-    @OneToMany(mappedBy = "appUser", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<UserRole> roles;
+    @OneToMany(mappedBy = "appUser", fetch = FetchType.EAGER)
+    private List<UserRole> roles = new ArrayList<>();
 
     @Column(nullable = false)
     @Version

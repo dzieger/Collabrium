@@ -4,7 +4,12 @@ import com.dzieger.exceptions.InvalidTokenException;
 import com.dzieger.models.AppUser;
 import com.dzieger.models.DTOs.LoginDTO;
 import com.dzieger.models.DTOs.TokenDTO;
+import com.dzieger.models.DTOs.UserRegisterDTO;
+import com.dzieger.models.Role;
+import com.dzieger.models.UserRole;
+import com.dzieger.repositories.RoleRepository;
 import com.dzieger.repositories.UserRepository;
+import com.dzieger.repositories.UserRoleRepository;
 import com.dzieger.security.JwtUtil;
 import io.jsonwebtoken.Claims;
 import org.slf4j.Logger;
@@ -13,6 +18,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,13 +29,20 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
     private final AllUserDetailsService allUserDetailsService;
 
-    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserRepository userRepository, AllUserDetailsService allUserDetailsService) {
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserRepository userRepository, RoleRepository roleRepository, UserRoleRepository userRoleRepository, AllUserDetailsService allUserDetailsService, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
         this.allUserDetailsService = allUserDetailsService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public TokenDTO login(LoginDTO loginDTO) {
@@ -43,7 +56,7 @@ public class AuthService {
             CustomUserDetails userDetails = (CustomUserDetails) allUserDetailsService.loadUserByUsername(loginDTO.getUsername());
             logger.info("Auth Service: User details loaded for user: " + userDetails.getUsername());
 
-            String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getTokenVersion());
+            String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getTokenVersion(), userDetails.getAuthorities());
 
             TokenDTO tokenDTO = new TokenDTO();
             tokenDTO.setToken(token);
@@ -70,12 +83,9 @@ public class AuthService {
 
             jwtUtil.validateToken(incomingTokenDTO.getToken(), userDetails.getTokenVersion());
 
-            if(!allUserDetailsService.getIsDevProfile()) {
-                incrementTokenVersion(userDetails);
-            }
+            incrementTokenVersion(userDetails);
 
-
-            String newToken = jwtUtil.generateToken(username, tokenVersion);
+            String newToken = jwtUtil.generateToken(username, tokenVersion, userDetails.getAuthorities());
 
             TokenDTO tokenDTO = new TokenDTO();
             tokenDTO.setToken(newToken);
@@ -102,9 +112,7 @@ public class AuthService {
 
             jwtUtil.validateToken(incomingTokenDTO.getToken(), userDetails.getTokenVersion());
 
-            logger.info("Token version before logout: " + userDetails.getTokenVersion());
-            userDetails.setTokenVersion(userDetails.getTokenVersion() + 1);
-            logger.info("Token version after logout: " + userDetails.getTokenVersion());
+            incrementTokenVersion(userDetails);
 
             logger.info("Token invalidated for user: " + jwtUtil.extractUsername(incomingTokenDTO.getToken()));
             return "Logout successful";
@@ -112,6 +120,39 @@ public class AuthService {
             logger.error("Logout failed", e);
             throw new InvalidTokenException("Logout failed", e);
         }
+    }
+
+    public String register(UserRegisterDTO userRegisterDTO) {
+        logger.info("Received register request");
+
+        if (isUsernameTaken(userRegisterDTO.getUsername())) {
+            logger.error("Register Failed - Username already taken");
+            throw new IllegalArgumentException("Register Failed - Username already taken");
+        }
+
+        if (isEmailTaken(userRegisterDTO.getEmail())) {
+            logger.error("Register Failed - Email already taken");
+            throw new IllegalArgumentException("Register Failed - Email already taken");
+        }
+
+        AppUser appUser = new AppUser();
+        appUser.setUsername(userRegisterDTO.getUsername());
+        appUser.setPassword(passwordEncoder.encode(userRegisterDTO.getPassword()));
+        appUser.setEmail(userRegisterDTO.getEmail());
+        appUser.setFirstName(userRegisterDTO.getFirstName());
+        appUser.setLastName(userRegisterDTO.getLastName());
+
+        userRepository.save(appUser);
+
+        Role userRole = roleRepository.findByNameIgnoreCase("USER").orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+
+        UserRole userRoleMapping = new UserRole();
+        userRoleMapping.setUser(appUser);
+        userRoleMapping.setRole(userRole);
+        userRoleRepository.save(userRoleMapping);
+
+        logger.info("Register Success - User registered: " + appUser.getUsername());
+        return "Register Success - User registered: " + appUser.getUsername();
     }
 
 

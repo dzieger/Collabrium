@@ -5,6 +5,7 @@ import com.dzieger.models.AppUser;
 import com.dzieger.models.DTOs.LoginDTO;
 import com.dzieger.models.DTOs.RequestRefreshTokenDTO;
 import com.dzieger.models.DTOs.TokenDTO;
+import com.dzieger.models.DTOs.UserRegisterDTO;
 import com.dzieger.security.JwtUtil;
 import com.dzieger.services.AuthService;
 import com.dzieger.services.UserService;
@@ -46,6 +47,11 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody TokenDTO tokenDTO) {
         return ResponseEntity.ok(authService.logout(tokenDTO));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody UserRegisterDTO userInformation) {
+        return ResponseEntity.ok(authService.register(userInformation));
     }
 
 }

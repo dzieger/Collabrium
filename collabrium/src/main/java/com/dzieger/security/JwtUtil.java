@@ -2,19 +2,22 @@ package com.dzieger.security;
 
 import com.dzieger.exceptions.InvalidTokenException;
 import com.dzieger.exceptions.TokenExpiredException;
-import com.dzieger.models.AppUser;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.Claims;
 
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
@@ -54,10 +57,11 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
     }
 
-    public String generateToken(String username, int tokenVersion) {
+    public String generateToken(String username, int tokenVersion, Collection<? extends GrantedAuthority> authorities) {
         logger.info("Generating token for user: " + username);
         return Jwts.builder()
                 .setSubject(username)
+                .claim("authorities", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .claim("tokenVersion", tokenVersion)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -88,6 +92,12 @@ public class JwtUtil {
             throw new InvalidTokenException("Token version mismatch");
         }
         return true;
+    }
+
+    public List<String> extractAuthorities(String token) {
+        logger.info("Extracting authorities from token");
+        Claims claims = extractAllClaims(token);
+        return claims.get("authorities", List.class);
     }
 
     private boolean isTokenExpired(String token) {

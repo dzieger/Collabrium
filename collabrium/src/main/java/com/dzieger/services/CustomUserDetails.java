@@ -1,44 +1,62 @@
 package com.dzieger.services;
 
+import com.dzieger.models.AppUser;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final String username;
-    private final String password;
-    private final Collection<? extends GrantedAuthority> authorities;
-    private int tokenVersion;
+    private final AppUser user;
 
-    public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities, int tokenVersion) {
-        this.username = username;
-        this.password = password;
-        this.authorities = authorities;
-        this.tokenVersion = tokenVersion;
-    }
-
-    public int getTokenVersion() {
-        return tokenVersion;
+    public CustomUserDetails(AppUser user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return user.getRoles().stream()
+                .map(userRole -> new GrantedAuthority() {
+                    @Override
+                    public String getAuthority() {
+                        return userRole.getRole().getName();
+                    }
+                }).collect(Collectors.toSet());
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
-    public void setTokenVersion(int tokenVersion) {
-        this.tokenVersion = tokenVersion;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    public int getTokenVersion() {
+        return user.getTokenVersion();
     }
 }
