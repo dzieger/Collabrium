@@ -1,7 +1,6 @@
 package com.dzieger.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
@@ -9,33 +8,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(name = "AppUser", description = "The user entity")
 @Component
 @Entity
 @Table(name = "users")
 public class AppUser {
 
+    @Schema(name = "id", description = "The id of the user", example = "123e4567-e89b-12d3-a456-426614174000")
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Schema(name = "username", description = "The username of the user", example = "username")
     @Column(nullable = false)
     private String username;
 
+    @Schema(name = "password", description = "The password of the user", example = "password")
     @Column(nullable = false)
     private String password;
 
+    @Schema(name = "email", description = "The email of the user", example = "email@email.com")
     @Column(nullable = false)
     private String email;
 
+    @Schema(name = "firstName", description = "The first name of the user", example = "firstName")
     @Column(nullable = false)
     private String firstName;
 
+    @Schema(name = "lastName", description = "The last name of the user", example = "lastName")
     @Column(nullable = false)
     private String lastName;
 
+    @Schema(name = "roles", description = "The roles of the user")
     @OneToMany(mappedBy = "appUser", fetch = FetchType.EAGER)
     private List<UserRole> roles = new ArrayList<>();
 
+    @Schema(name = "tokenVersion", description = "The token version of the user", example = "1")
     @Column(nullable = false)
     @Version
     private int tokenVersion;

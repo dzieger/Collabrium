@@ -1,23 +1,25 @@
-package com.dzieger.services;
+package com.dzieger.security;
 
 import com.dzieger.models.AppUser;
 import com.dzieger.repositories.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
-
+/**
+ * AllUserDetailsService is used to load user details from the database for Spring Security.
+ *
+ * @see org.springframework.security.core.userdetails.UserDetailsService
+ * @see com.dzieger.models.AppUser
+ * @see com.dzieger.security.CustomUserDetails
+ *
+ * @version 1.0
+ */
 @Service
 public class AllUserDetailsService implements UserDetailsService {
 

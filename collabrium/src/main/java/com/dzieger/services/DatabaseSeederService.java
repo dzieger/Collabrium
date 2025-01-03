@@ -6,12 +6,25 @@ import com.dzieger.models.UserRole;
 import com.dzieger.repositories.RoleRepository;
 import com.dzieger.repositories.UserRepository;
 import com.dzieger.repositories.UserRoleRepository;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.logging.Logger;
 
+/**
+ * DatabaseSeederService is used to seed the database with initial data.
+ *
+ * @see com.dzieger.models.AppUser
+ * @see com.dzieger.models.Role
+ * @see com.dzieger.models.UserRole
+ * @see com.dzieger.repositories.RoleRepository
+ * @see com.dzieger.repositories.UserRepository
+ * @see com.dzieger.repositories.UserRoleRepository
+ *
+ * @version 1.0
+ */
 @Service
 public class DatabaseSeederService {
 
@@ -28,6 +41,15 @@ public class DatabaseSeederService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * seedDatabase is used to seed the database with initial data.
+     *
+     * @see com.dzieger.models.AppUser
+     * @see com.dzieger.models.Role
+     * @see com.dzieger.models.UserRole
+     *
+     * @version 1.0
+     */
     @Transactional
     public void seedDatabase() {
         logger.info("Seeding database");
@@ -57,6 +79,26 @@ public class DatabaseSeederService {
             userRoleRepository.save(userRoleAdmin);
 
             logger.info("Created admin user");
+        }
+
+        if (userRepository.findByUsername("user").isEmpty()) {
+
+            AppUser user = new AppUser();
+            user.setEmail("N/A");
+            user.setFirstName("N/A");
+            user.setLastName("N/A");
+            user.setEmail("N/A");
+            user.setUsername("user");
+            user.setPassword(passwordEncoder.encode("password"));
+            user.setTokenVersion(0);
+            userRepository.save(user);
+
+            UserRole userRoleUser = new UserRole();
+            userRoleUser.setUser(user);
+            userRoleUser.setRole(roleUser);
+            userRoleRepository.save(userRoleUser);
+
+            logger.info("Created user user");
         }
     }
 

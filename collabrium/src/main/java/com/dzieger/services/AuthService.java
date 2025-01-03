@@ -10,8 +10,9 @@ import com.dzieger.models.UserRole;
 import com.dzieger.repositories.RoleRepository;
 import com.dzieger.repositories.UserRepository;
 import com.dzieger.repositories.UserRoleRepository;
+import com.dzieger.security.AllUserDetailsService;
+import com.dzieger.security.CustomUserDetails;
 import com.dzieger.security.JwtUtil;
-import io.jsonwebtoken.Claims;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,46 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+/**
+ * ****************************** Auth Service *******************************
+ *
+ * The authService handles all authentication business logic such as:
+ * - Login
+ * - Refreshing a token
+ * - Logging out
+ * - Registering a new user
+ *
+ * The service uses the JwtUtil to generate and validate JWT tokens.
+ * @see com.dzieger.security.JwtUtil
+ *
+ * The service uses the UserRepository to interact with the database.
+ * @see com.dzieger.repositories.UserRepository
+ *
+ * The service uses the RoleRepository to interact with the database.
+ * @see com.dzieger.repositories.RoleRepository
+ *
+ * The service uses the UserRoleRepository to interact with the database.
+ * @see com.dzieger.repositories.UserRoleRepository
+ *
+ * The service uses the AllUserDetailsService to load user details.
+ * @see AllUserDetailsService
+ *
+ * The service uses the PasswordEncoder to encode passwords.
+ * @see org.springframework.security.crypto.password.PasswordEncoder
+ *
+ * ****************************************************************************
+ *
+ * Methods:
+ * - login(LoginDTO loginDTO): TokenDTO
+ *
+ * - refresh(TokenDTO incomingTokenDTO): TokenDTO
+ *
+ * - logout(TokenDTO incomingTokenDTO): String
+ *
+ * - register(UserRegisterDTO userRegisterDTO): String
+ *
+ */
 
 @Service
 public class AuthService {
@@ -45,6 +86,14 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Login to the application
+     *
+     * @param loginDTO {String username, String password} - User credentials
+     * @return TokenDTO {String token} - Token generated for the user
+     * @throws InvalidTokenException - If the username or password is invalid
+     */
+
     public TokenDTO login(LoginDTO loginDTO) {
         logger.info("Received login request");
 
@@ -61,13 +110,21 @@ public class AuthService {
             TokenDTO tokenDTO = new TokenDTO();
             tokenDTO.setToken(token);
 
-            logger.info("Login Success - Token generated for user: {}", jwtUtil.extractUsername(token));
+            logger.info("Login Success - Token generated for user: {}", loginDTO.getUsername());
             return tokenDTO;
         } catch (AuthenticationException e) {
             logger.error("Login Failed - Invalid username or password");
             throw new InvalidTokenException("Login Failed - Invalid username or password");
         }
     }
+
+    /**
+     * Refresh a JWT token
+     * @param incomingTokenDTO {String token} - Token to be refreshed
+     * @return TokenDTO {String token} - New token generated for the user
+     * @throws InvalidTokenException - If the token is invalid
+     * @throws UsernameNotFoundException - If the username is not found
+     */
 
     public TokenDTO refresh(TokenDTO incomingTokenDTO) {
         logger.info("Received refresh token request");
@@ -97,6 +154,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Logout of the application
+     * @param incomingTokenDTO {String token} - Token to be invalidated
+     * @return String - Logout message
+     * @throws InvalidTokenException - If the token is invalid
+     */
     public String logout(TokenDTO incomingTokenDTO) {
         logger.info("Received logout request");
 
@@ -119,6 +182,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * Register a new user
+     * @param userRegisterDTO {String username, String password, String email, String firstName, String lastName} - User details
+     * @return String - Registration message
+     * @throws IllegalArgumentException - If the username or email is already taken
+     */
     public String register(UserRegisterDTO userRegisterDTO) {
         logger.info("Received register request");
 
@@ -153,18 +222,28 @@ public class AuthService {
     }
 
 
+    // Helper methods
+
+    // Check if the username is already taken
     public boolean isUsernameTaken(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
 
+    // Check if the email is already taken
     public boolean isEmailTaken(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
+
 
     public AppUser getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
+    // Increment the token version for a user
+    /**
+     * Increment the token version for a user
+     * @param userDetails - User details
+     */
     public void incrementTokenVersion(CustomUserDetails userDetails) {
         AppUser appUser = getUserByUsername(userDetails.getUsername());
 
