@@ -76,6 +76,16 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructor
+     * @param authenticationManager - AuthenticationManager
+     * @param jwtUtil - JwtUtil
+     * @param userRepository - UserRepository
+     * @param roleRepository - RoleRepository
+     * @param userRoleRepository - UserRoleRepository
+     * @param allUserDetailsService - AllUserDetailsService
+     * @param passwordEncoder - PasswordEncoder
+     */
     public AuthService(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserRepository userRepository, RoleRepository roleRepository, UserRoleRepository userRoleRepository, AllUserDetailsService allUserDetailsService, PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
@@ -224,17 +234,31 @@ public class AuthService {
 
     // Helper methods
 
-    // Check if the username is already taken
+    /**
+     * Check if the username is already taken
+     * @param username - The username to check
+     * @return boolean - True if the username is taken, false otherwise
+     */
     public boolean isUsernameTaken(String username) {
         return userRepository.findByUsername(username).isPresent();
     }
 
-    // Check if the email is already taken
+    /**
+     * Check if the email is already taken
+     * @param email - The email to check
+     * @return boolean - True if the email is taken, false otherwise
+     */
     public boolean isEmailTaken(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
 
 
+    /**
+     * Get a user by username
+     * @param username - The username to search for
+     * @return AppUser - The user with the given username
+     * @throws UsernameNotFoundException - If the user is not found
+     */
     public AppUser getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }

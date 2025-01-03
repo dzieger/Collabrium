@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.dzieger.collabrium"},{"l":"com.dzieger.config"},{"l":"com.dzieger.controllers"},{"l":"com.dzieger.exceptions"},{"l":"com.dzieger.models"},{"l":"com.dzieger.models.DTOs"},{"l":"com.dzieger.repositories"},{"l":"com.dzieger.security"},{"l":"com.dzieger.services"}];updateSearchResults();

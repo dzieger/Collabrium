@@ -27,6 +27,16 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
+    /**
+     * Default constructor
+     */
+    public JwtUtil() {
+        // Default constructor
+    }
+
+    /**
+     * Logger
+     */
     private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
 

@@ -15,12 +15,33 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * Spring Security Config
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+    /**
+     * SecurityConfig constructor
+     */
+    public SecurityConfig() {
+        // Default constructor
+    }
+
+    /**
+     * Logger
+     */
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+    /**
+     * SecurityFilterChain
+     *
+     * @param http HttpSecurity
+     * @param jwtAuthenticationFilter JwtAuthenticationFilter
+     * @return SecurityFilterChain
+     * @throws Exception Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         logger.info("Configuring SecurityFilterChain");
@@ -38,12 +59,24 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * PasswordEncoder
+     *
+     * @return PasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         logger.info("Creating BCryptPasswordEncoder bean");
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * AuthenticationManager
+     *
+     * @param configuration AuthenticationConfiguration
+     * @return AuthenticationManager
+     * @throws Exception Exception
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();

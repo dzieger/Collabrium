@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * AppUser is the entity class for the user entity.
+ */
 @Schema(name = "AppUser", description = "The user entity")
 @Component
 @Entity
@@ -48,9 +51,23 @@ public class AppUser {
     @Version
     private int tokenVersion;
 
+    /**
+     * Default constructor
+     */
     public AppUser() {
     }
 
+    /**
+     * Constructor
+     *
+     * @param id The id of the user
+     * @param username The username of the user
+     * @param password The password of the user
+     * @param email The email of the user
+     * @param firstName The first name of the user
+     * @param lastName The last name of the user
+     * @param tokenVersion The token version of the user
+     */
     public AppUser(UUID id, String username, String password, String email, String firstName, String lastName, int tokenVersion) {
         this.id = id;
         this.username = username;
@@ -61,70 +78,138 @@ public class AppUser {
         this.tokenVersion = tokenVersion;
     }
 
+    /**
+     * getId
+     * @return the id of the user
+     */
     public UUID getId() {
         return id;
     }
 
+    /**
+     * setId
+     * @param id the id of the user
+     */
     public void setId(UUID id) {
         this.id = id;
     }
 
+    /**
+     * getUsername
+     * @return the username of the user
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * setUsername
+     * @param username the username of the user
+     */
     public void setUsername(String username) {
         this.username = username;
     }
 
+    /**
+     * getPassword
+     * @return the password of the user
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * setPassword
+     * @param password the password of the user
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * getEmail
+     * @return the email of the user
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * setEmail
+     * @param email the email of the user
+     */
     public void setEmail(String email) {
         this.email = email;
     }
 
+    /**
+     * getFirstName
+     * @return the first name of the user
+     */
     public String getFirstName() {
         return firstName;
     }
 
+    /**
+     * setFirstName
+     * @param firstName the first name of the user
+     */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
+    /**
+     * getLastName
+     * @return the last name of the user
+     */
     public String getLastName() {
         return lastName;
     }
 
+    /**
+     * setLastName
+     * @param lastName the last name of the user
+     */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
+    /**
+     * getRoles
+     * @return the roles of the user
+     */
     public List<UserRole> getRoles() {
         return roles;
     }
 
+    /**
+     * setRoles
+     * @param roles the roles of the user
+     */
     public void setRoles(List<UserRole> roles) {
         this.roles = roles;
     }
 
+    /**
+     * getTokenVersion
+     * @return the token version of the user
+     */
     public int getTokenVersion() {
         return tokenVersion;
     }
 
+    /**
+     * setTokenVersion
+     * @param tokenVersion the token version of the user
+     */
     public void setTokenVersion(int tokenVersion) {
         this.tokenVersion = tokenVersion;
     }
 
+    /**
+     * toString
+     * @return the string representation of the user
+     */
     @Override
     public String toString() {
         return "AppUser{" +

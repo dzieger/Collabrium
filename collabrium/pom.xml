@@ -145,7 +145,7 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.4.1</version>
 				<configuration>
-					<destDir>${project.build.directory}/docs/v1.0/javadoc</destDir>
+					<destDir>${project.build.directory}/javadoc</destDir>
 				</configuration>
 			</plugin>
 <!--			<plugin>-->

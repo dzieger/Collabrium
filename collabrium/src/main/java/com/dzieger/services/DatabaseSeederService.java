@@ -34,6 +34,14 @@ public class DatabaseSeederService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Constructor
+     *
+     * @param userRepository The UserRepository
+     * @param roleRepository The RoleRepository
+     * @param userRoleRepository The UserRoleRepository
+     * @param passwordEncoder The PasswordEncoder
+     */
     public DatabaseSeederService(UserRepository userRepository, RoleRepository roleRepository, UserRoleRepository userRoleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -44,11 +52,6 @@ public class DatabaseSeederService {
     /**
      * seedDatabase is used to seed the database with initial data.
      *
-     * @see com.dzieger.models.AppUser
-     * @see com.dzieger.models.Role
-     * @see com.dzieger.models.UserRole
-     *
-     * @version 1.0
      */
     @Transactional
     public void seedDatabase() {

@@ -28,11 +28,26 @@ public class AllUserDetailsService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
+    /**
+     * Default constructor
+     *
+     * @param passwordEncoder the password encoder
+     * @param userRepository the user repository
+     */
     public AllUserDetailsService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
+    /**
+     * loadUserByUsername
+     *
+     * This method is used to load a user by their username.
+     *
+     * @param username the username
+     * @return the user details
+     * @throws UsernameNotFoundException if the user is not found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         logger.info("Loading user: {}", username);

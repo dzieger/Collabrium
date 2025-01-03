@@ -1,0 +1,9 @@
+com.dzieger.collabrium
+com.dzieger.config
+com.dzieger.controllers
+com.dzieger.exceptions
+com.dzieger.models
+com.dzieger.models.DTOs
+com.dzieger.repositories
+com.dzieger.security
+com.dzieger.services

@@ -39,6 +39,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final AuthService authService;
 
+    /**
+     * Constructor
+     *
+     * @param jwtUtil          JwtUtil
+     * @param userDetailsService UserDetailsService
+     * @param authService      AuthService
+     */
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, AuthService authService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
