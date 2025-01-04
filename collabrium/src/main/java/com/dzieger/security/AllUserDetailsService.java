@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
  * AllUserDetailsService is used to load user details from the database for Spring Security.
+ * Retrieves user data from the database and creates a UserDetails object for authentication.
  *
  * @see org.springframework.security.core.userdetails.UserDetailsService
  * @see com.dzieger.models.AppUser
@@ -23,26 +23,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class AllUserDetailsService implements UserDetailsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AllUserDetailsService.class);
-
-    private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(AllUserDetailsService.class);
     private final UserRepository userRepository;
 
     /**
      * Default constructor
      *
-     * @param passwordEncoder the password encoder
      * @param userRepository the user repository
      */
-    public AllUserDetailsService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.passwordEncoder = passwordEncoder;
+    public AllUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     /**
-     * loadUserByUsername
+     * Loads a user by username from the database.
      *
-     * This method is used to load a user by their username.
+     * This method is called by Spring Security to load a user by username for authentication.
      *
      * @param username the username
      * @return the user details
@@ -50,7 +46,7 @@ public class AllUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        logger.info("Loading user: {}", username);
+        log.debug("Loading user: {}", username);
 
         AppUser appUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));

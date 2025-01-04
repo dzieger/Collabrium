@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -31,7 +30,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Default constructor
@@ -53,7 +52,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<Map<String, String>> handleInvalidTokenException(InvalidTokenException e) {
-        logger.warn("Invalid token: {}", e.getMessage());
+        log.warn("Invalid token: {}", e.getMessage());
         return createResponse(HttpStatus.UNAUTHORIZED, "Invalid token", e.getMessage());
     }
 
@@ -70,7 +69,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<Map<String, String>> handleTokenExpiredException(TokenExpiredException e) {
-        logger.warn("Token expired: {}", e.getMessage());
+        log.warn("Token expired: {}", e.getMessage());
         return createResponse(HttpStatus.UNAUTHORIZED, "Token expired", e.getMessage());
     }
 
@@ -87,7 +86,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleException(Exception e) {
-        logger.error("Unexpected error occurred: {}", e.getMessage(), e);
+        log.error("Unexpected error occurred: {}", e.getMessage(), e);
         return createResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error", e.getMessage());
     }
 
@@ -104,7 +103,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
-        logger.warn("Bad request: {}", e.getMessage());
+        log.warn("Bad request: {}", e.getMessage());
         return createResponse(HttpStatus.BAD_REQUEST, "Invalid argument", e.getMessage());
     }
 
@@ -121,7 +120,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUsernameNotFoundException(UsernameNotFoundException e) {
-        logger.warn("User not found: {}", e.getMessage());
+        log.warn("User not found: {}", e.getMessage());
         return createResponse(HttpStatus.UNAUTHORIZED, "User not found", e.getMessage());
     }
 
@@ -138,7 +137,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(UserNotFoundException e) {
-        logger.warn("User not found: {}", e.getMessage());
+        log.warn("User not found: {}", e.getMessage());
         return createResponse(HttpStatus.NOT_FOUND, "User not found", e.getMessage());
     }
 

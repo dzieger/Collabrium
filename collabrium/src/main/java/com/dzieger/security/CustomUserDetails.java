@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 /**
  * CustomUserDetails
  *
+ * It adopts the AppUser entity for Spring Security.
  * This class is used to provide the UserDetails for the Spring Security
  * framework. It is used to provide the user's roles and permissions to the
  * framework.
@@ -43,12 +44,8 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return user.getRoles().stream()
-                .map(userRole -> new GrantedAuthority() {
-                    @Override
-                    public String getAuthority() {
-                        return userRole.getRole().getName();
-                    }
-                }).collect(Collectors.toSet());
+                .map(userRole -> (GrantedAuthority) () -> userRole.getRole().getName())
+                .collect(Collectors.toList());
     }
 
     /**

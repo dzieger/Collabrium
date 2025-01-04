@@ -10,26 +10,51 @@ import jakarta.validation.constraints.NotBlank;
  * registration endpoint. It is used to provide the user registration
  * information to the endpoint.
  *
+ * Example:
+ * <pre>
+ *     UserRegisterDTO userRegisterDTO = new UserRegisterDTO("user", "password123", "email@email.com", "John", "Doe");
+ * </pre>
+ *
  * @version 1.0
  */
 public class UserRegisterDTO {
 
+    /**
+     * The username for registration.
+     * Must be non-blank
+     */
     @NotBlank
     private String username;
 
+    /**
+     * The password for registration.
+     */
     @NotBlank
     private String password;
 
+    /**
+     * The email for registration.
+     */
     @NotBlank
     @Email
     private String email;
 
+    /**
+     * The first name for registration.
+     */
     @NotBlank
     private String firstName;
 
+    /**
+     * The last name for registration.
+     */
     @NotBlank
     private String lastName;
 
+    /**
+     * The phone number for registration.
+     * Optional
+     */
     private String phoneNumber;
 
     /**

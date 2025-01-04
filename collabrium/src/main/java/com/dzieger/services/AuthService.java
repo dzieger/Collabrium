@@ -23,44 +23,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * ****************************** Auth Service *******************************
+ * AuthService handles authentication-related business logic for the application.
+ * It provides methods for logging in, refreshing tokens, logging out, and
+ * registering new users. The service integrates with Spring Security and
+ * uses JWT for stateless authentication.
  *
- * The authService handles all authentication business logic such as:
- * - Login
- * - Refreshing a token
- * - Logging out
- * - Registering a new user
+ * Responsibilities:
+ * - Validate user credentials and generate JWT tokens.
+ * - Manage token lifecycle, including versioning and invalidation.
+ * - Register new users and assign default roles.
  *
- * The service uses the JwtUtil to generate and validate JWT tokens.
- * @see com.dzieger.security.JwtUtil
- *
- * The service uses the UserRepository to interact with the database.
- * @see com.dzieger.repositories.UserRepository
- *
- * The service uses the RoleRepository to interact with the database.
- * @see com.dzieger.repositories.RoleRepository
- *
- * The service uses the UserRoleRepository to interact with the database.
- * @see com.dzieger.repositories.UserRoleRepository
- *
- * The service uses the AllUserDetailsService to load user details.
- * @see AllUserDetailsService
- *
- * The service uses the PasswordEncoder to encode passwords.
- * @see org.springframework.security.crypto.password.PasswordEncoder
- *
- * ****************************************************************************
- *
- * Methods:
- * - login(LoginDTO loginDTO): TokenDTO
- *
- * - refresh(TokenDTO incomingTokenDTO): TokenDTO
- *
- * - logout(TokenDTO incomingTokenDTO): String
- *
- * - register(UserRegisterDTO userRegisterDTO): String
- *
+ * Dependencies:
+ * - JwtUtil: For generating and validating JWT tokens.
+ * - UserRepository, RoleRepository, UserRoleRepository: For database operations.
+ * - AuthenticationManager: For Spring Security authentication.
  */
+
 
 @Service
 public class AuthService {
@@ -73,7 +51,6 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final AllUserDetailsService allUserDetailsService;
-
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -97,7 +74,7 @@ public class AuthService {
     }
 
     /**
-     * Login to the application
+     * Authenticate a user and generate a JWT token
      *
      * @param loginDTO {String username, String password} - User credentials
      * @return TokenDTO {String token} - Token generated for the user
@@ -159,7 +136,7 @@ public class AuthService {
 
             logger.info("Token refreshed for user: {}", jwtUtil.extractUsername(newToken));
             return tokenDTO;
-        } catch (Exception e) {
+        } catch (UsernameNotFoundException e) {
             throw new InvalidTokenException("Token refresh failed", e);
         }
     }
@@ -192,6 +169,8 @@ public class AuthService {
         }
     }
 
+
+    // TODO: Move pieces of the register method to seperate services for better separation of concerns
     /**
      * Register a new user
      * @param userRegisterDTO {String username, String password, String email, String firstName, String lastName} - User details

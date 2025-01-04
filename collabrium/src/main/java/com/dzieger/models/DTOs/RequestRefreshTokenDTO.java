@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
  * refresh token endpoint. It is used to provide the refresh token to the
  * endpoint.
  *
+ *
  * @version 1.0
  */
 public class RequestRefreshTokenDTO {

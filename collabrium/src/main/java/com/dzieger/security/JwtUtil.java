@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,11 @@ import java.util.stream.Collectors;
 
 /**
  * Utility class for handling JWT tokens
+ *
+ * This class provides methods for generating, validating, and extracting information from JWT tokens.
+ *
+ *
+ * @version 1.0
  */
 @Component
 public class JwtUtil {
@@ -37,17 +43,41 @@ public class JwtUtil {
     /**
      * Logger
      */
-    private final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
-
+    private final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
     /**
-     * Secret key used to sign the JWT token
+     * Secret for creating the SecretKey
      */
-    private Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    @Value("${jwt.secret}")
+    private String secret;
+
     /**
-     * Expiration time for the token in milliseconds
+     * Expiration time for the JWT token
      */
-    private final long expiration = 3600000; // 1 hour
+    @Value("${jwt.expiration}")
+    private int expiration;
+
+    /**
+     * Secret key for signing the JWT token
+     */
+    private Key SECRET_KEY;
+
+    /**
+     * Initializes the secret key using the secret string passed in the application.properties file
+     */
+    @PostConstruct
+    public void init() {
+        try {
+            if (secret == null || secret.isEmpty()) {
+                throw new IllegalArgumentException("JWT secret cannot be null or empty");
+            }
+            this.SECRET_KEY = Keys.hmacShaKeyFor(secret.getBytes());
+            log.info("Secret key initialized successfully");
+        } catch (Exception e) {
+            log.error("Failed to initialize secret key", e);
+            throw new IllegalStateException("Failed to initialize secret key", e);
+        }
+    }
 
     /**
      * Extracts the username from the token
@@ -56,11 +86,17 @@ public class JwtUtil {
      * @return Username
      */
     public String extractUsername(String token) {
-        logger.info("Extracting username from token");
+        log.info("Extracting username from token");
         try {
             Claims claims = extractAllClaims(token);
+            String username = claims.getSubject();
+            log.debug("Username extracted: {}", username);
             return claims.getSubject();
+        } catch (TokenExpiredException e) {
+            log.error("Token has expired", e);
+            throw new TokenExpiredException("Token has expired", e);
         } catch (JwtException e) {
+            log.error("Unable to extract username: Invalid Token", e);
             throw new InvalidTokenException("Unable to extract username: Invalid Token", e);
         }
     }
@@ -72,7 +108,7 @@ public class JwtUtil {
      * @return Token version
      */
     public int extractTokenVersion(String token) {
-        logger.info("Extracting token version from token");
+        log.info("Extracting token version from token");
         try {
             Claims claims = extractAllClaims(token);
             return claims.get("tokenVersion", Integer.class);
@@ -91,7 +127,7 @@ public class JwtUtil {
      */
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = extractAllClaims(token);
-        logger.info("Extracting claim from token");
+        log.info("Extracting claim from token");
         return claimsResolver.apply(claims);
     }
 
@@ -102,7 +138,7 @@ public class JwtUtil {
      * @return All claims
      */
     private Claims extractAllClaims(String token) {
-        logger.info("Extracting all claims from token");
+        log.info("Extracting all claims from token");
         return Jwts.parserBuilder().setSigningKey(SECRET_KEY).build().parseClaimsJws(token).getBody();
     }
 
@@ -115,34 +151,19 @@ public class JwtUtil {
      * @return JWT token
      */
     public String generateToken(String username, int tokenVersion, Collection<? extends GrantedAuthority> authorities) {
-        logger.info("Generating token for user: {}", username);
+        log.debug("Generating token for user: {}", username);
+        Date now = new Date();
+        Date expirationDate = new Date(now.getTime() + expiration);
+        log.debug("Token expiration date: {}", expirationDate);
+
         return Jwts.builder()
                 .setSubject(username)
                 .claim("authorities", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .claim("tokenVersion", tokenVersion)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(SECRET_KEY)
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    /**
-     * @deprecated Use {@link #validateToken(String, int)} instead
-     * Validates a JWT token
-     *
-     * @param token JWT token
-     *
-     * @return True if the token is valid, false otherwise
-     */
-    @Deprecated(since = "Jan 02 2025", forRemoval = true)
-    private boolean validateToken(String token) {
-        try {
-            return !isTokenExpired(token);
-        } catch (TokenExpiredException e) {
-            throw new TokenExpiredException("Token has expired");
-        } catch (JwtException e) {
-            throw new InvalidTokenException("Token is invalid", e);
-        }
     }
 
     /**
@@ -153,11 +174,11 @@ public class JwtUtil {
      * @return True if the token is valid, false otherwise
      */
     public boolean validateToken(String token, int tokenVersion) {
-        logger.info("Validating token");
+        log.info("Validating token");
         Claims claims = extractAllClaims(token);
         int tokenVersionClaim = claims.get("tokenVersion", Integer.class);
 
-        if (isTokenExpired(token)) {
+        if (new Date().after(extractExpiration(token))) {
             throw new TokenExpiredException("Token has expired");
         }
 
@@ -174,21 +195,11 @@ public class JwtUtil {
      * @return Authorities
      */
     public List<String> extractAuthorities(String token) {
-        logger.info("Extracting authorities from token");
+        log.info("Extracting authorities from token");
         Claims claims = extractAllClaims(token);
         return claims.get("authorities", List.class);
     }
 
-    /**
-     * Checks if the token is expired
-     *
-     * @param token JWT token
-     * @return True if the token is expired, false otherwise
-     */
-    private boolean isTokenExpired(String token) {
-        logger.info("Checking if token is expired");
-        return extractExpiration(token).before(new Date());
-    }
 
     /**
      * Extracts the expiration date from the token
@@ -197,7 +208,7 @@ public class JwtUtil {
      * @return Expiration date
      */
     private Date extractExpiration(String token) {
-        logger.info("Extracting expiration date from token");
+        log.info("Extracting expiration date from token");
         return extractClaim(token, Claims::getExpiration);
     }
 

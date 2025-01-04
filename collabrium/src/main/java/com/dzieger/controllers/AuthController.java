@@ -28,7 +28,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     /**
      * Constructor for the AuthController
@@ -54,7 +54,7 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> login(@Valid @RequestBody LoginDTO credentials) {
-        logger.debug("Endpoint *** /auth/login *** hit: Attempting to log in user with username: " + credentials.getUsername());
+        log.debug("Endpoint *** /auth/login *** hit: Attempting to log in user with username: " + credentials.getUsername());
         return ResponseEntity.ok(authService.login(credentials));
     }
 
@@ -73,7 +73,7 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public ResponseEntity<TokenDTO> refresh(@Valid @RequestBody TokenDTO incomingTokenDTO) {
-        logger.debug("Endpoint *** /auth/refresh *** hit: Attempting to refresh token");
+        log.debug("Endpoint *** /auth/refresh *** hit: Attempting to refresh token");
         return ResponseEntity.ok(authService.refresh(incomingTokenDTO));
     }
 
@@ -92,7 +92,7 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@Valid @RequestBody TokenDTO tokenDTO) {
-        logger.debug("Endpoint *** /auth/logout *** hit: Attempting to log out user");
+        log.debug("Endpoint *** /auth/logout *** hit: Attempting to log out user");
         return ResponseEntity.ok(authService.logout(tokenDTO));
     }
 
@@ -110,7 +110,7 @@ public class AuthController {
     })
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody UserRegisterDTO userInformation) {
-        logger.debug("Endpoint *** /auth/register *** hit: Attempting to register new user with username: " + userInformation.getUsername());
+        log.debug("Endpoint *** /auth/register *** hit: Attempting to register new user with username: " + userInformation.getUsername());
         return ResponseEntity.ok(authService.register(userInformation));
     }
 
@@ -124,7 +124,7 @@ public class AuthController {
             tags = {"User Authentication"})
     @PatchMapping("/update/password")
     public ResponseEntity<String> updatePassword(@Valid @RequestBody UserRegisterDTO userInformation) {
-        logger.debug("Endpoint *** /auth/update/password *** hit: Attempting to update password for user with username: " + userInformation.getUsername());
+        log.debug("Endpoint *** /auth/update/password *** hit: Attempting to update password for user with username: " + userInformation.getUsername());
         return ResponseEntity.ok("Not yet implemented");
     }
 
@@ -138,7 +138,7 @@ public class AuthController {
             tags = {"User Authentication"})
     @PatchMapping("/account/token/revoke")
     public ResponseEntity<String> revokeToken(@Valid @RequestBody TokenDTO tokenDTO) {
-        logger.debug("Endpoint *** /auth/account/token/revoke *** hit: Attempting to revoke token");
+        log.debug("Endpoint *** /auth/account/token/revoke *** hit: Attempting to revoke token");
         return ResponseEntity.ok("Not yet implemented");
     }
 

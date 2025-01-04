@@ -13,11 +13,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 /**
- * Spring Security Config
+ * SecurityConfig sets up the Spring Security configuration for the application.
+ * It defines security policies, such as endpoint access rules, authentication mechanisms,
+ * and password encoding strategies.
+ *
+ * An authentication filter (JwtAuthenticationFilter) is added to handle JWT-based authentication.
+ *
+ * @version 1.0
  */
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -32,10 +37,16 @@ public class SecurityConfig {
     /**
      * Logger
      */
-    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+
+    // TODO: Add and externalize all public endpoints
 
     /**
      * SecurityFilterChain
+     * - Disables CSRF protection
+     * - Allows public access to Swagger UI and API documentation
+     * - Allows public access to the authentication endpoints
+     * - Requires authentication for all other requests
      *
      * @param http HttpSecurity
      * @param jwtAuthenticationFilter JwtAuthenticationFilter
@@ -44,7 +55,7 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        logger.info("Configuring SecurityFilterChain");
+        log.info("Configuring SecurityFilterChain");
 
         http
                 .csrf(csrf -> csrf.disable())
@@ -55,23 +66,25 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        logger.info("SecurityFilterChain configured");
+        log.info("SecurityFilterChain configured");
         return http.build();
     }
 
     /**
      * PasswordEncoder
+     * - Creates a BCryptPasswordEncoder bean
      *
      * @return PasswordEncoder
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        logger.info("Creating BCryptPasswordEncoder bean");
+        log.info("Creating BCryptPasswordEncoder bean");
         return new BCryptPasswordEncoder();
     }
 
     /**
      * AuthenticationManager
+     * - Creates an AuthenticationManager bean
      *
      * @param configuration AuthenticationConfiguration
      * @return AuthenticationManager

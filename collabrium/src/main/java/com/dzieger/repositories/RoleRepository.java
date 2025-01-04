@@ -8,8 +8,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * RoleRepository is the repository interface for the role entity.
+ * RoleRepository is the repository interface for managing Role entities.
+ * It provides methods to perform CRUD operations and custom queries
+ * for the Role entity.
+ *
+ * @version 1.0
  */
+
 @Repository
 public interface RoleRepository extends JpaRepository<Role, UUID> {
 

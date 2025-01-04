@@ -6,6 +6,11 @@ package com.dzieger.models.DTOs;
  * This class is used to provide the data transfer object for the token
  * endpoint. It is used to provide the token to the endpoint.
  *
+ * Example:
+ * <pre>
+ *     TokenDTO tokenDTO = new TokenDTO(token);
+ * </pre>
+ *
  * @version 1.0
  */
 public class TokenDTO {

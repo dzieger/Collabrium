@@ -8,24 +8,41 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 /**
- * UserRole is the entity class for the user role entity.
+ * Represents the association between a user and a role.
+ * This entity links the AppUser and Role entities through many-to-one relationships.
+ * It is mapped to the "user_roles" table in the database.
+ *
+ * @version 1.0
  */
+
 @Schema(name = "UserRole", description = "The user role entity")
 @Component
 @Entity
 @Table(name = "user_roles")
 public class UserRole {
 
+    /**
+     * The id of the user role.
+     * This is the primary key for the user role entity.
+     */
     @Schema(name = "id", description = "The id of the user role", example = "123e4567-e89b-12d3-a456-426614174000")
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    /**
+     * The user of the user role.
+     * This is a required field for the user role entity.
+     */
     @Schema(name = "user", description = "The user of the user role")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
     private AppUser appUser;
 
+    /**
+     * The role of the user role.
+     * This is a required field for the user role entity.
+     */
     @Schema(name = "role", description = "The role of the user role")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="role_id")

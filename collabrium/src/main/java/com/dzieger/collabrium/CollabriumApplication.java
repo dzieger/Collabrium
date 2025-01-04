@@ -34,7 +34,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories("com.dzieger.repositories")
 public class CollabriumApplication implements CommandLineRunner {
 
-	private static final Logger logger = LoggerFactory.getLogger(CollabriumApplication.class);
+	private static final Logger log = LoggerFactory.getLogger(CollabriumApplication.class);
 
 	private final DatabaseSeederService databaseSeederService;
 
@@ -54,7 +54,7 @@ public class CollabriumApplication implements CommandLineRunner {
 	 */
 	public static void main(String[] args) {
 		SpringApplication.run(CollabriumApplication.class, args);
-		logger.info("Collabrium Application has started successfully.");
+		log.info("Collabrium Application has started successfully.");
 	}
 
 	/**
@@ -65,11 +65,11 @@ public class CollabriumApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 		try {
-			logger.debug("Starting database seeding...");
+			log.debug("Starting database seeding...");
 			databaseSeederService.seedDatabase();
-			logger.info("Database seeding completed successfully.");
+			log.info("Database seeding completed successfully.");
 		} catch (Exception e) {
-			logger.error("Database seeding failed", e);
+			log.error("Database seeding failed", e);
 		}
 	}
 }

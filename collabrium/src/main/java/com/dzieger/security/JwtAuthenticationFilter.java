@@ -2,7 +2,6 @@ package com.dzieger.security;
 
 import com.dzieger.exceptions.InvalidTokenException;
 import com.dzieger.exceptions.TokenExpiredException;
-import com.dzieger.services.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,37 +17,41 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * **************************** JwtAuthenticationFilter **********************************
+ * JwtAuthenticationFilter is a custom filter for Spring Security.
+ * It intercepts incoming requests to validate JWT tokens and sets
+ * the authentication context for the request if the token is valid.
  *
- * This class is a filter that intercepts incoming requests and checks for a JWT token in the authorization header.
- * If a token is found, it will validate the token and set the authentication context for the request.
+ * This filter is executed once per request and integrates with the
+ * Spring Security filter chain.
  *
+ * Dependencies:
+ * - JwtUtil: Provides token parsing and validation functionality.
+ * - UserDetailsService: Loads user details from the database.
+ * - AuthService: Handles token-related business logic.
+ *
+ * @version 1.0
  */
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    private final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    private final AuthService authService;
 
     /**
      * Constructor
      *
      * @param jwtUtil          JwtUtil
      * @param userDetailsService UserDetailsService
-     * @param authService      AuthService
      */
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService, AuthService authService) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
-        this.authService = authService;
     }
 
     /**
@@ -67,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             IOException, ServletException {
         String authorizationHeader = request.getHeader("Authorization");
 
-        logger.info("Starting doFilterInternal");
+        log.debug("Starting doFilterInternal");
 
 
         String username = null;
@@ -76,7 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Extract username and token from Authorization header
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            logger.info("Extracting username and token from Authorization header");
+            log.info("Extracting username and token from Authorization header");
             token = authorizationHeader.substring(7);
             username = jwtUtil.extractUsername(token);
         }
@@ -84,13 +86,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // If username is found and the authentication context is not set, set the authentication context
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            logger.info("Setting authentication context");
+            log.info("Setting authentication context");
             CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
 
             try {
                 // Validate the token
                 if (jwtUtil.validateToken(token, userDetails.getTokenVersion())) {
-                    logger.info("Token validated for username: {}", username);
+                    log.info("Token validated for username: {}", username);
 
                     // Extract authorities from token
                     List<String> authorities = jwtUtil.extractAuthorities(token);
@@ -103,16 +105,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    logger.info("Authentication context set");
+                    log.info("Authentication context set");
                 }
             } catch (TokenExpiredException e) {
-                logger.warn("Token has expired");
+                log.warn("Token has expired: {}", e.getMessage());
             } catch (InvalidTokenException e) {
-                logger.warn("Invalid token");
+                log.warn("Invalid token provided: {}", e.getMessage());
             }
         }
 
-        logger.info("Proceeding with filter chain");
+        log.info("Proceeding with filter chain");
         filter.doFilter(request, response);
     }
 

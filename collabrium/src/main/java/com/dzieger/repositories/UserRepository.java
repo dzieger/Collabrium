@@ -7,8 +7,13 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 /**
- * UserRepository is the repository interface for the user entity.
+ * UserRepository is the repository interface for managing AppUser entities.
+ * It provides methods to perform CRUD operations and custom queries
+ * for user data, such as finding users by username or email.
+ *
+ * @version 1.0
  */
+
 @Repository
 public interface UserRepository extends JpaRepository<AppUser, Long> {
 

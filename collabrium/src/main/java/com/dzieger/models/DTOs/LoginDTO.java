@@ -1,35 +1,47 @@
 package com.dzieger.models.DTOs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
  * LoginDTO
  *
- * This class is used to provide the data transfer object for the login
- * endpoint. It is used to provide the username and password to the
- * endpoint.
+ * Represents the data required for user authentication. This class serves
+ * as a Data Transfer Object (DTO) for the login endpoint.
+ *
+ * Validation constraints ensure that the fields are properly populated.
+ *
+ * Example:
+ * <pre>
+ *     LoginDTO loginDTO = new LoginDTO("user", "password123");
+ * </pre>
  *
  * @version 1.0
  */
 public class LoginDTO {
 
-    @NotBlank
-    @Size(min = 3, max = 50)
+    /**
+     * The username for authentication.
+     * Must be non-blank
+     */
+    @NotBlank(message = "Username cannot be blank")
     private String username;
 
-    @NotBlank
-    @Size(min = 8, max = 24)
+    /**
+     * The password for authentication.
+     */
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
     /**
-     * Default constructor
+     * Default constructor.
      */
     public LoginDTO() {
     }
 
     /**
-     * Constructor
+     * Constructs a LoginDTO with the provided username and password.
      *
      * @param username the username
      * @param password the password
@@ -40,7 +52,7 @@ public class LoginDTO {
     }
 
     /**
-     * getUsername
+     * Returns the username.
      * @return the username
      */
     public String getUsername() {
@@ -48,15 +60,15 @@ public class LoginDTO {
     }
 
     /**
-     * setUsername
-     * @param username the username
+     * Updates the username.
+     * @param username the new username
      */
     public void setUsername(String username) {
         this.username = username;
     }
 
     /**
-     * getPassword
+     * Returns the password.
      * @return the password
      */
     public String getPassword() {
@@ -64,8 +76,8 @@ public class LoginDTO {
     }
 
     /**
-     * setPassword
-     * @param password the password
+     * Updates the password.
+     * @param password the new password
      */
     public void setPassword(String password) {
         this.password = password;

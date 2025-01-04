@@ -7,24 +7,40 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * Role is the entity class for the role entity.
+ * Represents a role in the system.
+ * Roles define sets of permissions and are associated with users through the UserRole entity.
+ * This entity is mapped to the "roles" table in the database.
+ *
+ * @version 1.0
  */
+
 @Schema(name = "Role", description = "The role entity")
 @Component
 @Entity
 @Table(name = "roles")
 public class Role {
 
-
+    /**
+     * The id of the role.
+     * This is the primary key for the role entity.
+     */
     @Schema(name = "id", description = "The id of the role", example = "123e4567-e89b-12d3-a456-426614174000")
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Schema(name = "name", description = "The name of the role", example = "ROLE_USER")
-    @Column(nullable = false)
+    /**
+     * The name of the role.
+     * This is a required field for the role entity and must be unique.
+     */
+    @Schema(name = "name", description = "The name of the role", example = "USER")
+    @Column(nullable = false, unique = true)
     private String name;
 
+    /**
+     * The user roles associated with the role.
+     * This is a list of UserRole entities that are associated with the role.
+     */
     @Schema(name = "userRoles", description = "The user roles of the role")
     @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
     private List<UserRole> userRoles = new ArrayList<>();

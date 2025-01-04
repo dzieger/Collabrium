@@ -9,43 +9,81 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * AppUser is the entity class for the user entity.
+ * Represents a user in the system.
+ * Each user has an associated list of roles and a token version for token invalidation.
+ * This entity is mapped to the "users" table in the database.
+ *
+ * @version 1.0
  */
+
 @Schema(name = "AppUser", description = "The user entity")
 @Component
 @Entity
 @Table(name = "users")
 public class AppUser {
 
+
+    /**
+     * The id of the user.
+     * This is the primary key for the user entity.
+     */
     @Schema(name = "id", description = "The id of the user", example = "123e4567-e89b-12d3-a456-426614174000")
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    /**
+     * The username of the user.
+     * This is a required field for the user entity.
+     */
     @Schema(name = "username", description = "The username of the user", example = "username")
     @Column(nullable = false)
     private String username;
 
+    /**
+     * The password of the user.
+     * This is a required field for the user entity.
+     */
     @Schema(name = "password", description = "The password of the user", example = "password")
     @Column(nullable = false)
     private String password;
 
+    /**
+     * The email of the user.
+     * This is a required field for the user entity.
+     */
     @Schema(name = "email", description = "The email of the user", example = "email@email.com")
     @Column(nullable = false)
     private String email;
 
+    /**
+     * The first name of the user.
+     * This is a required field for the user entity.
+     */
     @Schema(name = "firstName", description = "The first name of the user", example = "firstName")
     @Column(nullable = false)
     private String firstName;
 
+    /**
+     * The last name of the user.
+     * This is a required field for the user entity.
+     */
     @Schema(name = "lastName", description = "The last name of the user", example = "lastName")
     @Column(nullable = false)
     private String lastName;
 
+    /**
+     * The roles of the user.
+     * This is a list of UserRole entities that are associated with the user.
+     */
     @Schema(name = "roles", description = "The roles of the user")
     @OneToMany(mappedBy = "appUser", fetch = FetchType.EAGER)
     private List<UserRole> roles = new ArrayList<>();
 
+    /**
+     * The token version of the user.
+     * This field is used to invalidate tokens when the user's roles change.
+     */
     @Schema(name = "tokenVersion", description = "The token version of the user", example = "1")
     @Column(nullable = false)
     @Version
